@@ -41,6 +41,7 @@ export default defineConfig({
   ],
   publicDir,
   build: {
+    target: 'esnext',
     outDir,
     /** Can slowDown build speed. */
     // sourcemap: isDev,
@@ -73,6 +74,9 @@ export default defineConfig({
         },
       },
     },
+  },
+  optimizeDeps: {
+    esbuildOptions: { target: 'esnext', supported: { bigint: true } },
   },
 });
 
