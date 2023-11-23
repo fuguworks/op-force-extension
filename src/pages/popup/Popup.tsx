@@ -5,6 +5,7 @@ import exampleThemeStorage from '@src/shared/storages/exampleThemeStorage';
 import { useEffect, useState } from 'react';
 import logo from '@assets/img/logo.svg';
 import logoColour from '@assets/img/logo-colour.svg';
+import { Loading } from './Loader';
 
 const Popup = () => {
   const [pending, setPending] = useState<any[]>([]);
@@ -26,8 +27,11 @@ const Popup = () => {
     chrome.storage.local.get({ signRequests: [] }, ({ signRequests }) => {
       console.log('>>>', signRequests);
       setPending(signRequests.map(tx => JSON.parse(tx)));
+      setPending([123]);
     });
   }, []);
+
+  const activeRequest = pending[0];
 
   return (
     <div className="flex flex-col bg-black p-6 gap-y-4">
@@ -39,30 +43,32 @@ const Popup = () => {
         </div>
       </div>
 
-      <div className="flex items-center flex-col bg-white rounded-xl pt-12 px-6 pb-8 gap-y-6">
-        <img src={logoColour} style={{ width: 136.02, height: 88 }} className="" />
-        <div className="text-center text-lg font-bold">
-          Would you like to use the Escape Hatch for this transaction?
-        </div>
+      {activeRequest ? (
+        <div className="flex items-center flex-col bg-white rounded-xl pt-12 px-6 pb-8 gap-y-6">
+          <img src={logoColour} style={{ width: 136.02, height: 88 }} className="" />
+          <div className="text-center text-lg font-bold">
+            Would you like to use the Escape Hatch for this transaction?
+          </div>
 
-        <div className="flex items-center gap-4 font-bold w-full">
-          <button className="py-4 px-6 rounded-full ring-2 ring-zinc-900 ring-inset  w-full">No</button>
-          <button className="py-4 px-6 bg-zinc-900 text-white rounded-full  w-full">Yes</button>
+          <div className="flex items-center gap-4 font-bold w-full">
+            <button className="py-4 px-6 rounded-full ring-2 ring-zinc-900 ring-inset  w-full">No</button>
+            <button className="py-4 px-6 bg-zinc-900 text-white rounded-full  w-full">Yes</button>
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="flex items-center flex-col bg-white rounded-xl pt-12 px-6 pb-8 gap-y-6">
+          <img src={logoColour} style={{ width: 136.02, height: 88 }} className="" />
+          <div className="text-center text-lg font-bold">
+            Connect to the
+            <br />
+            Escape Hatch
+          </div>
 
-      <div className="flex items-center flex-col bg-white rounded-xl pt-12 px-6 pb-8 gap-y-6">
-        <img src={logoColour} style={{ width: 136.02, height: 88 }} className="" />
-        <div className="text-center text-lg font-bold">
-          Connect to the
-          <br />
-          Escape Hatch
+          <div className="flex items-center gap-4 font-bold w-full">
+            <button className="py-4 px-6 bg-zinc-900 text-white rounded-full w-full">Connect</button>
+          </div>
         </div>
-
-        <div className="flex items-center gap-4 font-bold w-full">
-          <button className="py-4 px-6 bg-zinc-900 text-white rounded-full w-full">Connect</button>
-        </div>
-      </div>
+      )}
 
       <div className="bg-white rounded-xl p-4 gap-2">
         <div>Pending transactions</div>
@@ -72,13 +78,10 @@ const Popup = () => {
         ) : (
           <>
             {pending.map((p, index) => (
-              <>
-                <div>Index: {index}</div>
-                <div>
-                  <button onClick={() => onClick(p, true)}>Yes</button>
-                  <button onClick={() => onClick(p, false)}>No</button>
-                </div>
-              </>
+              <div className="flex items-center gap-2 bg-blue-100 rounded-full w-full">
+                <Loading />
+                <div className="font-bold text-xs text-blue-500 p-2 pr-3">Decoded tx info</div>
+              </div>
             ))}
           </>
         )}
