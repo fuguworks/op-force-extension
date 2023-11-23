@@ -51,6 +51,19 @@ const Popup = () => {
         </div>
       </div>
 
+      <div className="flex items-center flex-col bg-white rounded-xl pt-12 px-6 pb-8 gap-y-6">
+        <img src={logoColour} style={{ width: 136.02, height: 88 }} className="" />
+        <div className="text-center text-lg font-bold">
+          Connect to the
+          <br />
+          Escape Hatch
+        </div>
+
+        <div className="flex items-center gap-4 font-bold w-full">
+          <button className="py-4 px-6 bg-zinc-900 text-white rounded-full w-full">Connect</button>
+        </div>
+      </div>
+
       <div className="bg-white rounded-xl p-4 gap-2">
         <div>Pending transactions</div>
 
