@@ -1,12 +1,21 @@
 import { BaseStorage, createStorage, StorageType } from '@src/shared/storages/base';
 import { SignClientTypes } from '@walletconnect/types';
 
-type Requests = SignClientTypes.BaseEventArgs[];
+export type WcRequest = SignClientTypes.BaseEventArgs<{
+  request: {
+    method: string;
+    params: any;
+  };
+  chainId: string;
+}>;
+
+type Requests = WcRequest[];
 
 type RequestsStorage = BaseStorage<Requests> & {
-  add: (r: SignClientTypes.BaseEventArgs) => void;
-  update: (topic: string, r: SignClientTypes.BaseEventArgs) => void;
-  remove: (r: SignClientTypes.BaseEventArgs) => void;
+  add: (r: WcRequest) => void;
+  update: (topic: string, r: WcRequest) => void;
+  remove: (r: WcRequest) => void;
+  set: (r: WcRequest[]) => void;
 };
 
 const storage = createStorage<Requests>('requests', [], {

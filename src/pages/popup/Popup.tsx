@@ -36,26 +36,21 @@ const Popup = () => {
   // We don't get notified when storage changes, so this listener
   // is a hack
   const [rerender, setRerender] = useState(0);
-  const onRerender = () => setRerender(r => r + 1);
+  const onRerender = () => {
+    walletConnectModal.closeModal();
+    setRerender(r => r + 1);
+  };
 
   useEffect(() => {
-    console.log('Setting up ubscriptions');
-    const unsubUri = messenger.reply('uri', ({ uri }) => {
-      console.log('reply(uri)', uri);
+    const unsubUri = messenger.reply('uri', async (uri: string) => {
       walletConnectModal.openModal({ uri });
     });
-    const unsubConnect = messenger.reply('connect', ({ session }) => {
-      console.log('connect', session);
-      walletConnectModal.closeModal();
-      onRerender();
-    });
-    const unsubRender = messenger.reply('rerender', () => {
+    const unsubRender = messenger.reply('rerender', async () => {
       onRerender();
     });
 
     return () => {
       unsubUri();
-      unsubConnect();
       unsubRender();
     };
   }, []);
@@ -70,16 +65,20 @@ const Popup = () => {
     window.close();
   };
 
-  const onDisconnect = async (session: SessionTypes.Struct) => {
-    messenger.send('disconnect', { session });
+  const onDisconnectWallet = async (session: SessionTypes.Struct) => {
+    messenger.send('disconnect-wallet', { session });
+  };
+
+  const onDisconnectApp = async (session: SessionTypes.Struct) => {
+    messenger.send('disconnect-app', { session });
   };
 
   const onConnectWc = () => {
     if (!uri) {
       return;
     }
-    console.log('pair', uri);
-    messenger.send('pair', { uri });
+    messenger.send('pair', uri);
+    setUri('');
   };
 
   const activeWcRequest = wcRequests[0];
@@ -95,7 +94,7 @@ const Popup = () => {
         </div>
       </div>
 
-      {activeExtensionRequest ? (
+      {activeExtensionRequest || activeWcRequest ? (
         <div className="flex items-center flex-col bg-white rounded-xl pt-12 px-6 pb-8 gap-y-6">
           <img src={logoColour} style={{ width: 136.02, height: 88 }} className="" />
           <div className="text-center text-lg font-bold">
@@ -105,12 +104,20 @@ const Popup = () => {
           <div className="flex items-center gap-4 font-bold w-full">
             <button
               className="py-4 px-6 rounded-full ring-2 ring-zinc-900 ring-inset w-full"
-              onClick={() => onMetaMaskClick(activeExtensionRequest, true)}>
+              onClick={() =>
+                activeExtensionRequest
+                  ? onMetaMaskClick(activeExtensionRequest, true)
+                  : onWalletConnectClick(activeWcRequest, true)
+              }>
               No
             </button>
             <button
               className="py-4 px-6 bg-zinc-900 text-white rounded-full w-full"
-              onClick={() => onMetaMaskClick(activeExtensionRequest, false)}>
+              onClick={() =>
+                activeExtensionRequest
+                  ? onMetaMaskClick(activeExtensionRequest, false)
+                  : onWalletConnectClick(activeWcRequest, false)
+              }>
               Yes
             </button>
           </div>
@@ -179,7 +186,7 @@ const Popup = () => {
                 <img className="h-4 w-4 rounded-full" src={s.peer.metadata.icons[0]} />
                 <div>{s.peer.metadata.name}</div>
 
-                <button className="ml-auto" onClick={() => onDisconnect(s)}>
+                <button className="ml-auto" onClick={() => onDisconnectWallet(s)}>
                   X
                 </button>
               </div>
@@ -200,7 +207,7 @@ const Popup = () => {
                 <img className="h-4 w-4 rounded-full" src={s.peer.metadata.icons[0]} />
                 <div>{s.peer.metadata.name}</div>
 
-                <button className="ml-auto" onClick={() => onDisconnect(s)}>
+                <button className="ml-auto" onClick={() => onDisconnectApp(s)}>
                   X
                 </button>
               </div>
