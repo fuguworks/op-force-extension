@@ -5,6 +5,8 @@ import { initializeMessenger } from '@root/src/messengers';
 import { OP_STACK_CHAINS } from '@root/src/shared/config/chains';
 import { MetamaskTransactionRequest } from '@root/src/shared/config/types';
 
+console.log('hier');
+
 const messenger = initializeMessenger({ connect: 'background' });
 
 const originalRequest = window.ethereum.request.bind(window.ethereum);

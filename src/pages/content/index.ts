@@ -25,31 +25,3 @@ function injectScript(file_path: string, tag: string) {
 }
 
 injectScript(chrome.runtime.getURL('src/pages/injected/index.js'), 'body');
-
-window.addEventListener(
-  'SignRequest',
-  function (evt: CustomEvent) {
-    console.log('[content] received SignRequest message', evt);
-    chrome.runtime.sendMessage({
-      type: 'SignRequest',
-      signRequest: evt.detail,
-    });
-  },
-  false,
-);
-
-chrome.runtime.onMessage.addListener(function (request, sender) {
-  if (request.target !== 'op-extension') {
-    return;
-  }
-
-  console.log('[content] received message from popup', request);
-
-  if (request.value === true) {
-    const event = new CustomEvent('Confirm', { detail: request.transaction });
-    window.dispatchEvent(event);
-  } else {
-    const event = new CustomEvent('Reject', { detail: request.transaction });
-    window.dispatchEvent(event);
-  }
-});
