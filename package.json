@@ -1,7 +1,7 @@
 {
   "name": "escape-hatch",
   "version": "0.0.1",
-  "description": "chrome extension boilerplate",
+  "description": "Censorship resistant transactions for OP rollups",
   "license": "MIT",
   "repository": {
     "type": "git",
