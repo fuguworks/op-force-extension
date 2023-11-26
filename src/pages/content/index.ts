@@ -7,8 +7,6 @@
  * If you want to use other modules in content scripts, you need to import them via these files.
  *
  */
-import('@pages/content/ui');
-import('@pages/content/injected');
 import('@pages/content/walletconnect');
 
 console.log('content loaded');
