@@ -1,16 +1,18 @@
-import { Address, Hex, encodeFunctionData } from 'viem';
+import { encodeFunctionData } from 'viem';
 
 import { OptimismPortalAbi } from '@root/src/abis/OptimismPortal';
+import { initializeMessenger } from '@root/src/messengers';
 import { OP_STACK_CHAINS } from '@root/src/shared/config/chains';
+import { MetamaskTransactionRequest } from '@root/src/shared/config/types';
+
+const messenger = initializeMessenger({ connect: 'background' });
 
 const originalRequest = window.ethereum.request.bind(window.ethereum);
 
 const log = (...args: any[]) => console.log('[escape-hatch] injected:', ...args);
 
-type MetamaskTransactionRequest = { data: Hex; from: Address; gas: Hex; to: Address; value: Hex };
-
 /**
- * Transactions don't specify a chainId when they come in, so we track them here
+ * MetaMask transactions don't specify a chainId when they come in, so we track them here
  */
 let lastSeenChainId: number = parseInt(window.ethereum?.chainId ?? '1');
 window.ethereum.on('chainChanged', (hexChainId: string) => {
@@ -27,19 +29,13 @@ window.ethereum.request = async request => {
     }
 
     const signRequest: MetamaskTransactionRequest = request.params[0];
-    var event = new CustomEvent('SignRequest', {
-      detail: JSON.stringify(signRequest),
-    });
-    log('[injected] intercepted request', JSON.stringify(request));
-    window.dispatchEvent(event);
-    return;
+    messenger.send('sign-request', { ...signRequest, chainId: lastSeenChainId });
   }
 
   return originalRequest(request);
 };
 
-window.addEventListener('Confirm', async (message: CustomEvent) => {
-  const tx: MetamaskTransactionRequest = JSON.parse(message.detail);
+messenger.reply('confirm', async (tx: MetamaskTransactionRequest) => {
   log('[injected]: confirm', tx);
 
   const gasEstimate = await window.ethereum.request({
@@ -80,8 +76,4 @@ window.addEventListener('Confirm', async (message: CustomEvent) => {
       },
     ],
   });
-});
-
-window.addEventListener('Reject', async message => {
-  log('[injected]: reject', message);
 });

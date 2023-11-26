@@ -1,19 +1,19 @@
 import { BaseStorage, createStorage, StorageType } from '@src/shared/storages/base';
 import { SessionTypes } from '@walletconnect/types';
 
-type Sessions = SessionTypes.Struct[];
+type Dapps = SessionTypes.Struct[];
 
-type SessionsStorage = BaseStorage<Sessions> & {
+type DappsStorage = BaseStorage<Dapps> & {
   add: (s: SessionTypes.Struct) => void;
   update: (topic: string, s: SessionTypes.Struct) => void;
   remove: (topic: string) => void;
 };
 
-const storage = createStorage<Sessions>('sessions', [], {
+const storage = createStorage<Dapps>('dapps', [], {
   storageType: StorageType.Local,
 });
 
-const sessionsStorage: SessionsStorage = {
+const dappsStorage: DappsStorage = {
   ...storage,
   add: session => {
     storage.set(sessions => [...sessions, session]);
@@ -26,4 +26,4 @@ const sessionsStorage: SessionsStorage = {
   },
 };
 
-export default sessionsStorage;
+export default dappsStorage;

@@ -1,14 +1,21 @@
+import { useEffect, useState } from 'react';
+
+import { WalletConnectModal } from '@walletconnect/modal';
+import { SessionTypes, SignClientTypes } from '@walletconnect/types';
+
 import logoColour from '@assets/img/logo-colour.svg';
 import logo from '@assets/img/logo.svg';
 import { initializeMessenger } from '@root/src/messengers';
 import { walletConnectProjectId } from '@root/src/shared/config/constants';
+import { MetamaskTransactionRequest } from '@root/src/shared/config/types';
 import useStorage from '@root/src/shared/hooks/useStorage';
+import requestsStorage from '@root/src/shared/storages/requestsStorage';
 import sessionsStorage from '@root/src/shared/storages/sessionsStorage';
+import dappsStorage from '@root/src/shared/storages/dappsStorage';
+import txsStorage from '@root/src/shared/storages/txsStorage';
 import withErrorBoundary from '@src/shared/hoc/withErrorBoundary';
 import withSuspense from '@src/shared/hoc/withSuspense';
-import { WalletConnectModal } from '@walletconnect/modal';
-import { SessionTypes } from '@walletconnect/types';
-import { useEffect, useState } from 'react';
+
 import { Loading } from './Loader';
 
 const walletConnectModal = new WalletConnectModal({
@@ -16,11 +23,15 @@ const walletConnectModal = new WalletConnectModal({
   chains: ['eip155:1'],
 });
 
-const messenger = initializeMessenger({ connect: 'contentScript' });
+const messenger = initializeMessenger({ connect: 'background' });
 
 const Popup = () => {
-  const sessions = useStorage(sessionsStorage);
-  const [pending, setPending] = useState<any[]>([]);
+  const [uri, setUri] = useState('');
+
+  const wcSessions = useStorage(sessionsStorage);
+  const dapps = useStorage(dappsStorage);
+  const wcRequests = useStorage(requestsStorage);
+  const txs = useStorage(txsStorage);
 
   // We don't get notified when storage changes, so this listener
   // is a hack
@@ -49,16 +60,13 @@ const Popup = () => {
     };
   }, []);
 
-  const onClick = async (transaction: any, value: boolean) => {
-    const tabs = await chrome.tabs.query({});
-    for (const tab of tabs) {
-      await chrome.tabs
-        .sendMessage(tab.id, { target: 'op-extension', value, transaction: JSON.stringify(transaction) })
-        .catch(() => null);
-    }
+  const onMetaMaskClick = async (transaction: MetamaskTransactionRequest, value: boolean) => {
+    messenger.send(value ? 'confirm' : 'reject', transaction);
+    window.close();
+  };
 
-    chrome.storage.local.set({ signRequests: [] });
-    setPending([]);
+  const onWalletConnectClick = async (transaction: SignClientTypes.BaseEventArgs, value: boolean) => {
+    messenger.send(value ? 'wc-confirm' : 'wc-reject', transaction);
     window.close();
   };
 
@@ -66,14 +74,16 @@ const Popup = () => {
     messenger.send('disconnect', { session });
   };
 
-  useEffect(() => {
-    chrome.storage.local.get({ signRequests: [] }, ({ signRequests }) => {
-      setPending(signRequests.map(tx => JSON.parse(tx)));
-      setPending([]);
-    });
-  }, []);
+  const onConnectWc = () => {
+    if (!uri) {
+      return;
+    }
+    console.log('pair', uri);
+    messenger.send('pair', { uri });
+  };
 
-  const activeRequest = pending[0];
+  const activeWcRequest = wcRequests[0];
+  const activeExtensionRequest = txs[0];
 
   return (
     <div className="flex flex-col bg-black p-6 gap-y-4">
@@ -85,7 +95,7 @@ const Popup = () => {
         </div>
       </div>
 
-      {activeRequest ? (
+      {activeExtensionRequest ? (
         <div className="flex items-center flex-col bg-white rounded-xl pt-12 px-6 pb-8 gap-y-6">
           <img src={logoColour} style={{ width: 136.02, height: 88 }} className="" />
           <div className="text-center text-lg font-bold">
@@ -95,12 +105,12 @@ const Popup = () => {
           <div className="flex items-center gap-4 font-bold w-full">
             <button
               className="py-4 px-6 rounded-full ring-2 ring-zinc-900 ring-inset w-full"
-              onClick={() => onClick(activeRequest, true)}>
+              onClick={() => onMetaMaskClick(activeExtensionRequest, true)}>
               No
             </button>
             <button
               className="py-4 px-6 bg-zinc-900 text-white rounded-full w-full"
-              onClick={() => onClick(activeRequest, false)}>
+              onClick={() => onMetaMaskClick(activeExtensionRequest, false)}>
               Yes
             </button>
           </div>
@@ -117,10 +127,7 @@ const Popup = () => {
           <div className="flex items-center gap-4 font-bold w-full">
             <button
               className="py-4 px-6 bg-zinc-900 text-white rounded-full w-full"
-              onClick={() => {
-                console.log('sending init');
-                messenger.send('init', {});
-              }}>
+              onClick={() => messenger.send('init', {})}>
               Connect
             </button>
           </div>
@@ -130,11 +137,11 @@ const Popup = () => {
       <div className="bg-white rounded-xl p-4 gap-2">
         <div>Pending transactions</div>
 
-        {pending.length === 0 ? (
+        {[...txs, ...wcRequests].length === 0 ? (
           <div className="text-zinc-400">No transactions yet…</div>
         ) : (
           <>
-            {pending.map((p, index) => (
+            {[...txs, ...wcRequests].map((p, index) => (
               <div className="flex items-center gap-2 bg-blue-100 rounded-full w-full">
                 <Loading />
                 <div className="font-bold text-xs text-blue-500 p-2 pr-3">Decoded tx info</div>
@@ -145,13 +152,50 @@ const Popup = () => {
       </div>
 
       <div className="bg-white rounded-xl p-4 gap-2">
+        <div>Connect WC</div>
+
+        <div>
+          <input
+            type="text"
+            className="bg-zinc-100 w-full rounded-md p-2"
+            value={uri}
+            onChange={e => setUri(e.target.value)}
+          />
+          <button className="py-4 px-6 bg-zinc-900 text-white rounded-full w-full" onClick={onConnectWc}>
+            Connect
+          </button>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-xl p-4 gap-2">
         <div>Current connections</div>
 
-        {sessions.length === 0 ? (
+        {wcSessions.length === 0 ? (
           <div className="text-zinc-400">No connected wallets yet…</div>
         ) : (
           <>
-            {sessions.map(s => (
+            {wcSessions.map(s => (
+              <div className="flex bg-zinc-100 p-2 items-center gap-2 rounded-full  ">
+                <img className="h-4 w-4 rounded-full" src={s.peer.metadata.icons[0]} />
+                <div>{s.peer.metadata.name}</div>
+
+                <button className="ml-auto" onClick={() => onDisconnect(s)}>
+                  X
+                </button>
+              </div>
+            ))}
+          </>
+        )}
+      </div>
+
+      <div className="bg-white rounded-xl p-4 gap-2">
+        <div>Connected apps</div>
+
+        {dapps.length === 0 ? (
+          <div className="text-zinc-400">No connected apps yet…</div>
+        ) : (
+          <>
+            {dapps.map(s => (
               <div className="flex bg-zinc-100 p-2 items-center gap-2 rounded-full  ">
                 <img className="h-4 w-4 rounded-full" src={s.peer.metadata.icons[0]} />
                 <div>{s.peer.metadata.name}</div>
@@ -168,4 +212,4 @@ const Popup = () => {
   );
 };
 
-export default withErrorBoundary(withSuspense(Popup, <div> Loading ... </div>), <div> Error Occur </div>);
+export default withErrorBoundary(withSuspense(Popup, <div> Loading ... </div>), <div> Error Occurred</div>);
