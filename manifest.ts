@@ -32,7 +32,18 @@ const manifest: chrome.runtime.ManifestV3 = {
   devtools_page: 'src/pages/devtools/index.html',
   web_accessible_resources: [
     {
-      resources: ['/src/pages/injected/index.js', 'assets/js/*.js', 'assets/css/*.css', 'icon-128.png', 'icon-34.png'],
+      resources: [
+        '/src/pages/injected/index.js',
+        '/assets/js/*.js',
+        '/assets/css/*.css',
+        '/assets/**/*.png',
+        '/assets/fonts/*.woff',
+        '/assets/fonts/*.woff2',
+        '/assets/woff/*.woff',
+        '/assets/woff2/*.woff2',
+        '/icon-128.png',
+        '/icon-34.png',
+      ],
       matches: ['*://*/*'],
     },
   ],

@@ -1,8 +1,24 @@
-body {
-  width: 390px;
-  height: 640px;
+@font-face {
+  font-family: 'Maru';
+  src:
+    url('@assets/fonts/GT-Maru-Bold.woff') format('woff'),
+    url('@assets/fonts/GT-Maru-Bold.woff2') format('woff2'),
+    url('@assets/fonts/GT-Maru-Medium.woff') format('woff'),
+    url('@assets/fonts/GT-Maru-Medium.woff2') format('woff2'),
+    url('@assets/fonts/GT-Maru-Regular.woff') format('woff'),
+    url('@assets/fonts/GT-Maru-Regular.woff2') format('woff2');
 }
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+html,
+body {
+  font-family: 'Maru' !important;
+}
+
+body {
+  width: 390px;
+  height: 640px;
+}

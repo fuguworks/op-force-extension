@@ -1,3 +1,10 @@
+import '@assets/fonts/GT-Maru-Bold.woff';
+import '@assets/fonts/GT-Maru-Bold.woff2';
+import '@assets/fonts/GT-Maru-Medium.woff';
+import '@assets/fonts/GT-Maru-Medium.woff2';
+import '@assets/fonts/GT-Maru-Regular.woff';
+import '@assets/fonts/GT-Maru-Regular.woff2';
+
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import '@pages/popup/index.css';
