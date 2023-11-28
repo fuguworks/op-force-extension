@@ -25,7 +25,6 @@ window.ethereum.on('chainChanged', (hexChainId: string) => {
 });
 
 window.ethereum.request = async request => {
-  log('request', request);
   if (request.method === 'eth_sendTransaction') {
     const config = OP_STACK_CHAINS.find(x => x.l2.id === lastSeenChainId);
     if (!config) {
@@ -97,6 +96,7 @@ messenger.reply('confirm', async ({ tx, id }: MetamaskTransactionRequest) => {
       ],
     });
   } catch (e) {
+    console.log(e);
     results[id] = e;
   }
 });
