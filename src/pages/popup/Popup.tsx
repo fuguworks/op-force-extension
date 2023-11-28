@@ -1,13 +1,9 @@
 import { useEffect, useState } from 'react';
 
-import { WalletConnectModal } from '@walletconnect/modal';
-import { SessionTypes, SignClientTypes } from '@walletconnect/types';
-
 import background from '@assets/img/background.png';
 import logoColour from '@assets/img/logo-colour.svg';
 import logo from '@assets/img/logo.svg';
 import { initializeMessenger } from '@root/src/messengers';
-import { walletConnectProjectId } from '@root/src/shared/config/constants';
 import { MetamaskTransactionRequest } from '@root/src/shared/config/types';
 import useStorage from '@root/src/shared/hooks/useStorage';
 import txsStorage from '@root/src/shared/storages/txsStorage';
@@ -15,11 +11,6 @@ import withErrorBoundary from '@src/shared/hoc/withErrorBoundary';
 import withSuspense from '@src/shared/hoc/withSuspense';
 
 import { Loading } from './Loader';
-
-// const walletConnectModal = new WalletConnectModal({
-//   projectId: walletConnectProjectId,
-//   chains: ['eip155:1'],
-// });
 
 const messenger = initializeMessenger({ connect: 'background' });
 
@@ -32,20 +23,15 @@ const Popup = () => {
   // is a hack
   const [rerender, setRerender] = useState(0);
   const onRerender = () => {
-    // walletConnectModal.closeModal();
     setRerender(r => r + 1);
   };
 
   useEffect(() => {
-    // const unsubUri = messenger.reply('uri', async (uri: string) => {
-    //   walletConnectModal.openModal({ uri });
-    // });
     const unsubRender = messenger.reply('rerender', async () => {
       onRerender();
     });
 
     return () => {
-      // unsubUri();
       unsubRender();
     };
   }, []);
@@ -53,27 +39,6 @@ const Popup = () => {
   const onMetaMaskClick = async (transaction: MetamaskTransactionRequest, value: boolean) => {
     messenger.send(value ? 'confirm' : 'reject', transaction);
     window.close();
-  };
-
-  const onWalletConnectClick = async (transaction: SignClientTypes.BaseEventArgs, value: boolean) => {
-    messenger.send(value ? 'wc-confirm' : 'wc-reject', transaction);
-    window.close();
-  };
-
-  const onDisconnectWallet = async (session: SessionTypes.Struct) => {
-    messenger.send('disconnect-wallet', { session });
-  };
-
-  const onDisconnectApp = async (session: SessionTypes.Struct) => {
-    messenger.send('disconnect-app', { session });
-  };
-
-  const onConnectWc = () => {
-    if (!uri) {
-      return;
-    }
-    messenger.send('pair', uri);
-    setUri('');
   };
 
   const activeExtensionRequest = txs[0];
@@ -137,65 +102,6 @@ const Popup = () => {
             </>
           )}
         </div>
-
-        {/* <div className="bg-white rounded-xl p-4 gap-2">
-          <div>Connect WC</div>
-
-          <div>
-            <input
-              type="text"
-              className="bg-zinc-100 w-full rounded-md p-2"
-              value={uri}
-              onChange={e => setUri(e.target.value)}
-            />
-            <button className="py-4 px-6 bg-zinc-900 text-white rounded-full w-full" onClick={onConnectWc}>
-              Connect
-            </button>
-          </div>
-        </div> */}
-
-        {/* <div className="bg-white rounded-xl p-4 gap-2">
-          <div>Current connections</div>
-
-          {wcSessions.length === 0 ? (
-            <div className="text-zinc-400">No connected wallets yet…</div>
-          ) : (
-            <>
-              {wcSessions.map(s => (
-                <div className="flex bg-zinc-100 p-2 items-center gap-2 rounded-full  ">
-                  <img className="h-4 w-4 rounded-full" src={s.peer.metadata.icons[0]} />
-                  <div>{s.peer.metadata.name}</div>
-
-                  <button className="ml-auto" onClick={() => onDisconnectWallet(s)}>
-                    X
-                  </button>
-                </div>
-              ))}
-            </>
-          )}
-        </div> */}
-
-        {/* <div className="bg-white rounded-xl p-4 gap-2">
-          <div>Connected apps</div>
-
-          {dapps.length === 0 ? (
-            <div className="text-zinc-400">No connected apps yet…</div>
-          ) : (
-            <>
-              {dapps.map(s => (
-                <div className="flex bg-zinc-100 p-2 items-center gap-2 rounded-full  ">
-                  <img className="h-4 w-4 rounded-full" src={s.peer.metadata.icons[0]} />
-                  <div>{s.peer.metadata.name}</div>
-
-                  <button className="ml-auto" onClick={() => onDisconnectApp(s)}>
-                    X
-                  </button>
-                </div>
-              ))}
-            </>
-          )}
-        </div>
-      */}
       </div>
     </div>
   );
