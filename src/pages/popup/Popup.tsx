@@ -3,55 +3,49 @@ import { useEffect, useState } from 'react';
 import { WalletConnectModal } from '@walletconnect/modal';
 import { SessionTypes, SignClientTypes } from '@walletconnect/types';
 
+import background from '@assets/img/background.png';
 import logoColour from '@assets/img/logo-colour.svg';
 import logo from '@assets/img/logo.svg';
-import background from '@assets/img/background.png';
 import { initializeMessenger } from '@root/src/messengers';
 import { walletConnectProjectId } from '@root/src/shared/config/constants';
 import { MetamaskTransactionRequest } from '@root/src/shared/config/types';
 import useStorage from '@root/src/shared/hooks/useStorage';
-import requestsStorage from '@root/src/shared/storages/requestsStorage';
-import sessionsStorage from '@root/src/shared/storages/sessionsStorage';
-import dappsStorage from '@root/src/shared/storages/dappsStorage';
 import txsStorage from '@root/src/shared/storages/txsStorage';
 import withErrorBoundary from '@src/shared/hoc/withErrorBoundary';
 import withSuspense from '@src/shared/hoc/withSuspense';
 
 import { Loading } from './Loader';
 
-const walletConnectModal = new WalletConnectModal({
-  projectId: walletConnectProjectId,
-  chains: ['eip155:1'],
-});
+// const walletConnectModal = new WalletConnectModal({
+//   projectId: walletConnectProjectId,
+//   chains: ['eip155:1'],
+// });
 
 const messenger = initializeMessenger({ connect: 'background' });
 
 const Popup = () => {
   const [uri, setUri] = useState('');
 
-  const wcSessions = useStorage(sessionsStorage);
-  const dapps = useStorage(dappsStorage);
-  const wcRequests = useStorage(requestsStorage);
   const txs = useStorage(txsStorage);
 
   // We don't get notified when storage changes, so this listener
   // is a hack
   const [rerender, setRerender] = useState(0);
   const onRerender = () => {
-    walletConnectModal.closeModal();
+    // walletConnectModal.closeModal();
     setRerender(r => r + 1);
   };
 
   useEffect(() => {
-    const unsubUri = messenger.reply('uri', async (uri: string) => {
-      walletConnectModal.openModal({ uri });
-    });
+    // const unsubUri = messenger.reply('uri', async (uri: string) => {
+    //   walletConnectModal.openModal({ uri });
+    // });
     const unsubRender = messenger.reply('rerender', async () => {
       onRerender();
     });
 
     return () => {
-      unsubUri();
+      // unsubUri();
       unsubRender();
     };
   }, []);
@@ -82,7 +76,6 @@ const Popup = () => {
     setUri('');
   };
 
-  const activeWcRequest = wcRequests[0];
   const activeExtensionRequest = txs[0];
 
   return (
@@ -97,7 +90,7 @@ const Popup = () => {
           </div>
         </div>
 
-        {activeExtensionRequest || activeWcRequest ? (
+        {activeExtensionRequest ? (
           <div className="flex items-center flex-col bg-white rounded-xl pt-12 px-6 pb-8 gap-y-6">
             <img src={logoColour} style={{ width: 136.02, height: 88 }} className="" />
             <div className="text-center text-lg font-bold">
@@ -107,20 +100,12 @@ const Popup = () => {
             <div className="flex items-center gap-4 font-bold w-full">
               <button
                 className="py-4 px-6 rounded-full ring-2 ring-zinc-900 ring-inset w-full"
-                onClick={() =>
-                  activeExtensionRequest
-                    ? onMetaMaskClick(activeExtensionRequest, true)
-                    : onWalletConnectClick(activeWcRequest, true)
-                }>
+                onClick={() => onMetaMaskClick(activeExtensionRequest, true)}>
                 No
               </button>
               <button
                 className="py-4 px-6 bg-zinc-900 text-white rounded-full w-full"
-                onClick={() =>
-                  activeExtensionRequest
-                    ? onMetaMaskClick(activeExtensionRequest, false)
-                    : onWalletConnectClick(activeWcRequest, false)
-                }>
+                onClick={() => onMetaMaskClick(activeExtensionRequest, false)}>
                 Yes
               </button>
             </div>
@@ -139,11 +124,11 @@ const Popup = () => {
         <div className="bg-white rounded-xl p-4 gap-2">
           <div>Pending transactions</div>
 
-          {[...txs, ...wcRequests].length === 0 ? (
+          {txs.length === 0 ? (
             <div className="text-zinc-400">No transactions yet…</div>
           ) : (
             <>
-              {[...txs, ...wcRequests].map((p, index) => (
+              {txs.map((p, index) => (
                 <div className="flex items-center gap-2 bg-blue-100 rounded-full w-full">
                   <Loading />
                   <div className="font-bold text-xs text-blue-500 p-2 pr-3">Decoded tx info</div>

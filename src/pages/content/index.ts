@@ -9,6 +9,8 @@
  */
 console.log('content loaded');
 
+import './extension';
+
 /**
  * injectScript - Inject internal script to available access to the `window`
  *
