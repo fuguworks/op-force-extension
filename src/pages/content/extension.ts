@@ -13,8 +13,6 @@ reloadOnUpdate('pages/background/index.ts');
  */
 reloadOnUpdate('pages/content/style.scss');
 
-console.log('extension loaded');
-
 const popupMessenger = initializeMessenger({ connect: 'popup' });
 const inPageMessenger = initializeMessenger({ connect: 'inpage' });
 const backgroundMessenger = initializeMessenger({ connect: 'background' });
@@ -25,17 +23,15 @@ const backgroundMessenger = initializeMessenger({ connect: 'background' });
 
 // Handle MM bound tx confirmation
 popupMessenger.reply('confirm', async (tx: MetamaskTransactionRequest) => {
-  console.log('content confirm', tx);
   txsStorage.remove(tx);
-  // popupMessenger.send('rerender', {});
+  backgroundMessenger.send('rerender', {});
   inPageMessenger.send('confirm', tx);
 });
 
 // Handle MM bound tx rejection
 popupMessenger.reply('reject', async (tx: MetamaskTransactionRequest) => {
-  console.log('content reject', tx);
   txsStorage.remove(tx);
-  // popupMessenger.send('rerender', {});
+  backgroundMessenger.send('rerender', {});
   inPageMessenger.send('reject', tx);
 });
 

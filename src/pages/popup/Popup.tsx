@@ -12,7 +12,6 @@ import withSuspense from '@src/shared/hoc/withSuspense';
 
 import { Loading } from './Loader';
 
-const contentScriptMessenger = initializeMessenger({ connect: 'contentScript' });
 const backgroundMessenger = initializeMessenger({ connect: 'background' });
 
 const Popup = () => {
@@ -26,7 +25,7 @@ const Popup = () => {
   };
 
   useEffect(() => {
-    const unsubRender = contentScriptMessenger.reply('rerender', async () => {
+    const unsubRender = backgroundMessenger.reply('rerender', async () => {
       onRerender();
     });
 
@@ -98,9 +97,9 @@ const Popup = () => {
           ) : (
             <>
               {txs.map((p, index) => (
-                <div className="flex items-center gap-2 bg-blue-100 rounded-full w-full">
+                <div className="flex items-center gap-2 bg-blue-100 rounded-full w-full px-4">
                   <Loading />
-                  <div className="font-bold text-xs text-blue-500 p-2 pr-3">Decoded tx {p.id}</div>
+                  <div className="font-bold text-xs text-blue-500 p-2 pr-3">Txn {p.id}</div>
                 </div>
               ))}
             </>

@@ -14,7 +14,7 @@ export function Loading() {
       <Lottie
         animationData={inProgress}
         loop={true}
-        className="w-24 h-24 opacity-50 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 block fill-black"
+        className="w-8 h-8 opacity-50 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 block fill-black"
         play
       />
     </motion.div>

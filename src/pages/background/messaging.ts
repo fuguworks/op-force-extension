@@ -22,6 +22,7 @@ content.reply('sign-request', async (tx: MetamaskTransactionRequest) => {
     left: 0,
   });
 });
+content.reply('rerender', args => popup.send('rerender', args));
 
 // Popup created via chrome.window.create doesn't register
 // content script

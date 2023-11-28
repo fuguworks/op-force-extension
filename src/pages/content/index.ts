@@ -9,8 +9,6 @@
  */
 import('@pages/content/extension');
 
-console.log('content loaded');
-
 /**
  * injectScript - Inject internal script to available access to the `window`
  *
@@ -27,6 +25,4 @@ function injectScript(file_path: string, tag: string) {
   node.appendChild(script);
 }
 
-console.log('injecting script');
 injectScript(chrome.runtime.getURL('src/pages/injected/index.js'), 'body');
-console.log('injected script');
