@@ -88,8 +88,8 @@ async function init() {
       await chrome.windows.create({
         url: chrome.runtime.getURL('src/pages/popup/index.html'),
         type: 'popup',
-        width: 300,
-        height: 300,
+        width: 390,
+        height: 640,
         top: 0,
       });
       return;

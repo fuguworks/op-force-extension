@@ -31,7 +31,10 @@ export const windowMessenger = createMessenger({
         window.removeEventListener('message', listener);
 
         const { response, error } = event.data.payload;
-        if (error) reject(new Error(error.message));
+        if (error) {
+          console.log(error);
+          reject(new Error(error.message));
+        }
         resolve(response);
       };
       window.addEventListener('message', listener);

@@ -12,11 +12,10 @@ import withSuspense from '@src/shared/hoc/withSuspense';
 
 import { Loading } from './Loader';
 
-const messenger = initializeMessenger({ connect: 'background' });
+const contentScriptMessenger = initializeMessenger({ connect: 'contentScript' });
+const backgroundMessenger = initializeMessenger({ connect: 'background' });
 
 const Popup = () => {
-  const [uri, setUri] = useState('');
-
   const txs = useStorage(txsStorage);
 
   // We don't get notified when storage changes, so this listener
@@ -27,7 +26,7 @@ const Popup = () => {
   };
 
   useEffect(() => {
-    const unsubRender = messenger.reply('rerender', async () => {
+    const unsubRender = contentScriptMessenger.reply('rerender', async () => {
       onRerender();
     });
 
@@ -37,8 +36,11 @@ const Popup = () => {
   }, []);
 
   const onMetaMaskClick = async (transaction: MetamaskTransactionRequest, value: boolean) => {
-    messenger.send(value ? 'confirm' : 'reject', transaction);
-    window.close();
+    await backgroundMessenger.send(value ? 'confirm' : 'reject', transaction);
+
+    if (txs.length === 1) {
+      window.close();
+    }
   };
 
   const activeExtensionRequest = txs[0];
@@ -50,8 +52,10 @@ const Popup = () => {
         <div className="bg-white rounded-xl flex items-center justify-between py-4 pl-6 pr-6">
           <img src={logo} style={{ width: 37.1, height: 24 }} className="" />
           <div className="flex items-center gap-4">
-            <a href="https://twitter.com/superbridgeapp">X.COM</a>
-            <a>DOCS</a>
+            <a href="https://twitter.com/superbridgeapp" target="_blank">
+              X.COM
+            </a>
+            {/* <a>DOCS</a> */}
           </div>
         </div>
 
@@ -65,18 +69,18 @@ const Popup = () => {
             <div className="flex items-center gap-4 font-bold w-full">
               <button
                 className="py-4 px-6 rounded-full ring-2 ring-zinc-900 ring-inset w-full"
-                onClick={() => onMetaMaskClick(activeExtensionRequest, true)}>
+                onClick={() => onMetaMaskClick(activeExtensionRequest, false)}>
                 No
               </button>
               <button
                 className="py-4 px-6 bg-zinc-900 text-white rounded-full w-full"
-                onClick={() => onMetaMaskClick(activeExtensionRequest, false)}>
+                onClick={() => onMetaMaskClick(activeExtensionRequest, true)}>
                 Yes
               </button>
             </div>
           </div>
         ) : (
-          <div className="flex items-center flex-col rounded-xl py-12 px-6 gap-y-6">
+          <div className="flex items-center flex-col rounded-xl py-24 px-6 gap-y-6">
             <img src={logoColour} style={{ width: 136.02, height: 88 }} className="" />
             <div className="text-center text-lg font-bold">
               Force L2 transactions
@@ -96,7 +100,7 @@ const Popup = () => {
               {txs.map((p, index) => (
                 <div className="flex items-center gap-2 bg-blue-100 rounded-full w-full">
                   <Loading />
-                  <div className="font-bold text-xs text-blue-500 p-2 pr-3">Decoded tx info</div>
+                  <div className="font-bold text-xs text-blue-500 p-2 pr-3">Decoded tx {p.id}</div>
                 </div>
               ))}
             </>
