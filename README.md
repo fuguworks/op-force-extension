@@ -7,6 +7,25 @@ The Escape Hatch is a browser extension that let's you send OP rollup bound tran
 
 The Escape Hatch by default intercepts browser wallet bound transactions, but mobile wallets can also be connected to it. Accordingly, you can also choose to connect to dapps via WalletConnect to the Escape Hatch so requests can be forwarded from them.
 
+## Usage
+
+The easiest way to use the Escape Hatch is to install it from the [Chrome Web Store](https://chromewebstore.google.com/).
+
+Failing that (maybe the extension is still under review), you can clone this repository and run it locally.
+
+```
+git clone git@github.com:superbridgeapp/escape-hatch.git
+cd escape-hatch
+pnpm i
+pnpm dev
+```
+
+Then you can load it as an extension 
+
+- Navigate to `chrome://extensions` in your browser
+- Toggle on `Developer Mode` in the top right of your screen
+- Click `Load unpacked`
+- Select the `dist/` directory of the folder you just ran `pnpm dev` in
 
 ## Next steps
 
@@ -21,3 +40,4 @@ Blindly signing deposit transactions can be a scary experience for users. Buildi
 #### L2 transaction hash computing
 
 Once WalletConnect support is live (specifically V2, where dapps and wallets maintain a mapping of networks supported), the extension will be able to precompute the L2 transaction hash and return that to the dapp so the dapp can wait for execution of the transaction.
+
