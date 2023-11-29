@@ -57,16 +57,17 @@ messenger.reply('confirm', async ({ tx, id }: MetamaskTransactionRequest) => {
   log('confirm', id);
 
   try {
-    const gasEstimate = await originalRequest({
-      method: 'eth_estimateGas',
-      params: [tx],
-    });
-
     const config = OP_STACK_CHAINS.find(x => x.l2.id === lastSeenChainId);
     if (!config) {
       log('no config found for this rollup');
       results[id] = await originalRequest({ method: 'eth_sendTransaction', params: [tx] });
+      return;
     }
+
+    const gasEstimate = await originalRequest({
+      method: 'eth_estimateGas',
+      params: [tx],
+    });
 
     await originalRequest({
       method: 'wallet_switchEthereumChain',
