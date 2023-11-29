@@ -104,5 +104,5 @@ messenger.reply('confirm', async ({ tx, id }: MetamaskTransactionRequest) => {
 
 messenger.reply('reject', async ({ tx, id }: MetamaskTransactionRequest) => {
   log('reject', id);
-  results[id] = new Error('User rejected');
+  results[id] = await originalRequest({ method: 'eth_sendTransaction', params: [tx] });
 });
