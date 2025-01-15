@@ -9,10 +9,6 @@ The Escape Hatch by default intercepts browser wallet bound transactions, but mo
 
 ## Usage
 
-The easiest way to use the Escape Hatch is to install it from the [Chrome Web Store](https://chromewebstore.google.com/).
-
-Failing that (maybe the extension is still under review), you can clone this repository and run it locally.
-
 ```
 git clone git@github.com:superbridgeapp/escape-hatch.git
 cd escape-hatch
